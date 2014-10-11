@@ -22,10 +22,7 @@ class Navception {
 	function register_hooks() {
 		add_action( 'admin_init', array( $this, 'add_nav_box' ) );
 
-		add_filter( 'nav_menu_css_class', array( $this, 'navception_class' ), 10, 3 );
-		add_filter( 'nav_menu_item_id', array( $this, 'navception_id' ), 10, 3 );
-
-		add_filter( 'walker_nav_menu_start_el', array( $this, 'navception' ), 10, 4 );
+		add_filter( 'wp_get_nav_menu_items', array( $this, 'navception' ), 10, 3 );
 
 		add_action( 'wp_ajax_check_for_limbo', array( $this, 'check_for_limbo_ajax' ) );
 		add_action( 'wp_update_nav_menu_item', array( $this, 'check_for_limbo'), 10, 3);
@@ -44,85 +41,55 @@ class Navception {
 		}
 	}
 
-	function navception_class( $classes, $item, $args = null ) {
-		if ( 'nav_menu' != $item->object ) {
-			return $classes;
-		}
-
-		$items = wp_get_nav_menu_items( $item->object_id );
-
-		if ( 0 == count( $items ) ) {
-			return $classes;
-		}
-
-		_wp_menu_item_classes_by_context( $items );
-		$first_item = $items[ 0 ];
-
-		$navcepted_classes   = empty( $first_item->classes ) ? array() : (array) $first_item->classes;
-		$navcepted_classes[] = 'menu-item-' . $first_item->ID;
-
-		$classes = array_merge( $classes, $navcepted_classes );
-		$classes = apply_filters( 'nav_menu_css_class', array_filter( $classes ), $first_item, $args );
-
-		return $classes;
-	}
-
-	function navception_id( $menu_item_id, $item, $args ) {
-		if ( 'nav_menu' != $item->object ) {
-			return $menu_item_id;
-		}
-
-		$items = wp_get_nav_menu_items( $item->object_id );
-
-		if ( 0 == count( $items ) ) {
-			return $menu_item_id;
-		}
-
-		$first_item = $items[ 0 ];
-
-		$id = apply_filters( 'nav_menu_item_id', 'menu-item-'. $first_item->ID, $first_item, $args );
-
-		return $id;
-	}
-
-	/*
+	/**
+	 * Replace Nav Menu Menu Items with Menus.
 	 *
+	 * @param array  $items An array of menu item post objects.
+	 * @param object $menu  The menu object.
+	 * @param array  $args  An array of arguments used to retrieve menu item objects.
 	 *
-	 *
-	 *	Tap into walker_nav_menu_start_el
-	 *	params: $item_output, $item, $depth, $args
+	 * @return array Array of menu items with possible Navception applied.
 	 */
-	function navception( $item_output, $item, $depth, $args ) {
-		if ( 'nav_menu' != $item->object ) {
-			return $item_output;
+	public function navception( $items, $menu, $args ) {
+		// Don't navcpetion in the admin
+		if ( is_admin() ) {
+			return $items;
 		}
 
-		//	Gotta find this out based on the item included
-		$navception_menu_id = $item->object_id;
-		//	if there's a max depth (or -1), do the math to find out how many depths are left.
-		$num = $args->depth;
-		if ( $num > 0 ) {
-			$num -= $depth;
+		$filtered_items = array();
+		$nav_id_prefix  = ord( 'a' );
+
+		foreach ( $items as $item ) {
+			if ( 'nav_menu' != $item->object ) {
+				$filtered_items[] = $item;
+				continue;
+			}
+
+			$navception_items = wp_get_nav_menu_items( $item->object_id, $args );
+
+			// If the nav menu item is an empty menu, just remove it.
+			if ( empty( $navception_items ) ) {
+				continue;
+			}
+
+			foreach ( $navception_items as $navception_item ) {
+				$navception_item->ID         .= chr( $nav_id_prefix );
+				$navception_item->db_id      .= chr( $nav_id_prefix );
+				$navception_item->menu_order .= chr( $nav_id_prefix );
+
+				if ( empty( $navception_item->menu_item_parent ) ) {
+					$navception_item->menu_item_parent = $item->menu_item_parent;
+				} else if ( $item->menu_item_parent != $navception_item->menu_item_parent ) {
+					$navception_item->menu_item_parent .= chr( $nav_id_prefix );
+				}
+
+				$filtered_items[] = $navception_item;
+			}
+
+			$nav_id_prefix += 1;
 		}
 
-		$navcepted_menu = wp_nav_menu( array(
-			'menu'       => $navception_menu_id,
-			'container'  => false,
-			'fallbak_cb' => false,
-			'items_wrap' => '%3$s',
-			'depth'      => $num,
-			'echo'       => false,
-		) );
-
-		$nav_ = explode( '>', $navcepted_menu );
-		array_shift( $nav_ );
-		$navcepted_menu = implode( '>', $nav_ );
-
-		$nav_ = explode( '</li', $navcepted_menu );
-		array_pop( $nav_ );
-		$navcepted_menu = implode( '</li', $nav_ );
-
-		return $navcepted_menu;
+		return $filtered_items;
 	}
 
 	function check_for_limbo( $menu_id, $menu_item_db_id, $args ) {
