@@ -30,7 +30,7 @@ class Navception {
 		add_action( 'wp_ajax_check_for_limbo', array( $this, 'check_for_limbo_ajax' ) );
 		add_action( 'wp_update_nav_menu_item', array( $this, 'check_for_limbo'), 10, 3);
 
-		add_action('admin_enqueue_scripts', array( $this, 'pw_load_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'pw_load_scripts' ) );
 
 		add_action( 'wp_create_nav_menu', array( $this, 'detect_new_menu' ) );
 	}
