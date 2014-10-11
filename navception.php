@@ -17,7 +17,6 @@
 
 		function __construct() {
 			$this->register_hooks();
-
 		}
 
 		function register_hooks() {
@@ -46,36 +45,36 @@
 		}
 
 		function navception_class( $classes, $item, $args = null ) {
-			if( $item->object != 'nav_menu' ) {
+			if ( 'nav_menu' != $item->object ) {
 				return $classes;
 			}
 
 			$items = wp_get_nav_menu_items( $item->object_id );
 
-			if( count( $items ) == 0 ) {
+			if ( 0 == count( $items ) ) {
 				return $classes;
 			}
 
 			_wp_menu_item_classes_by_context( $items );
 			$first_item = $items[ 0 ];
 
-			$navcepted_classes = empty( $first_item->classes ) ? array() : (array) $first_item->classes;
+			$navcepted_classes   = empty( $first_item->classes ) ? array() : (array) $first_item->classes;
 			$navcepted_classes[] = 'menu-item-' . $first_item->ID;
-			$classes = array_merge( $classes, $navcepted_classes );
 
+			$classes = array_merge( $classes, $navcepted_classes );
 			$classes = apply_filters( 'nav_menu_css_class', array_filter( $classes ), $first_item, $args );
 
 			return $classes;
 		}
 
 		function navception_id( $menu_item_id, $item, $args ) {
-			if( $item->object != 'nav_menu' ) {
+			if ( 'nav_menu' != $item->object ) {
 				return $menu_item_id;
 			}
 
 			$items = wp_get_nav_menu_items( $item->object_id );
 
-			if( count( $items ) == 0 ) {
+			if ( 0 == count( $items ) ) {
 				return $menu_item_id;
 			}
 
@@ -84,7 +83,6 @@
 			$id = apply_filters( 'nav_menu_item_id', 'menu-item-'. $first_item->ID, $first_item, $args );
 
 			return $id;
-
 		}
 
 		/*
@@ -95,7 +93,7 @@
 		 *	params: $item_output, $item, $depth, $args
 		 */
 		function navception( $item_output, $item, $depth, $args ) {
-			if( $item->object != 'nav_menu' ) {
+			if ( 'nav_menu' != $item->object ) {
 				return $item_output;
 			}
 
@@ -103,17 +101,17 @@
 			$navception_menu_id = $item->object_id;
 			//	if there's a max depth (or -1), do the math to find out how many depths are left.
 			$num = $args->depth;
-			if( $num > 0 ) {
+			if ( $num > 0 ) {
 				$num -= $depth;
 			}
 
 			$navcepted_menu = wp_nav_menu( array(
-				'menu' => $navception_menu_id,
-				'container' => false,
+				'menu'       => $navception_menu_id,
+				'container'  => false,
 				'fallbak_cb' => false,
 				'items_wrap' => '%3$s',
-				'depth' => $num,
-				'echo' => false
+				'depth'      => $num,
+				'echo'       => false,
 			) );
 
 			$nav_ = explode( '>', $navcepted_menu );
@@ -125,15 +123,14 @@
 			$navcepted_menu = implode( '</li', $nav_ );
 
 			return $navcepted_menu;
-
 		}
 
 		function check_for_limbo( $menu_id, $menu_item_db_id, $args ) {
-			if( isset( $args['menu-item-object'] ) && $args['menu-item-object'] == 'nav_menu' ) {
-				$original_menu = $menu_id;
+			if ( isset( $args['menu-item-object'] ) && 'nav_menu' == $args['menu-item-object'] ) {
+				$original_menu   = $menu_id;
 				$navception_menu = (int) $args['menu-item-object-id'];
 
-				if( $this->causes_limbo( $original_menu, $navception_menu ) ) {
+				if ( $this->causes_limbo( $original_menu, $navception_menu ) ) {
 					$this->removed_menus[] = $args['menu-item-title'];
 					add_action( 'admin_notices', array( $this, 'warn_of_limbo' ) );
 					wp_delete_post( $menu_item_db_id, true );
@@ -143,40 +140,41 @@
 		}
 
 		function check_for_limbo_ajax() {
-			$original_menu = isset( $_POST['navception_original_menu'] ) ? $_POST['navception_original_menu'] : false;
+			$original_menu  = isset( $_POST['navception_original_menu'] ) ? $_POST['navception_original_menu'] : false;
 			$navcepted_menu = isset( $_POST['navception_new_menu'] ) ? $_POST['navception_new_menu'] : false;
-			$checkbox_ul = isset( $_POST['navception_checkbox_ul'] ) ? $_POST['navception_checkbox_ul'] : false;
-			if( ! ( is_numeric( $original_menu ) && is_numeric( $navcepted_menu ) && $checkbox_ul ) ) {
+			$checkbox_ul    = isset( $_POST['navception_checkbox_ul'] ) ? $_POST['navception_checkbox_ul'] : false;
+
+			if ( ! ( is_numeric( $original_menu ) && is_numeric( $navcepted_menu ) && $checkbox_ul ) ) {
 				wp_send_json( array(
 					'success' => false
 				) );
 			}
 
-			$original_menu = (int) $original_menu;
+			$original_menu  = (int) $original_menu;
 			$navcepted_menu = (int) $navcepted_menu;
 
-			if( $this->causes_limbo( $original_menu, $navcepted_menu ) ) {
+			if ( $this->causes_limbo( $original_menu, $navcepted_menu ) ) {
 				wp_send_json( array(
-					'success' => true,
+					'success'      => true,
 					'causes_limbo' => true,
-					'checkbox_ul' => $checkbox_ul,
-					'menu_id' => $navcepted_menu
+					'checkbox_ul'  => $checkbox_ul,
+					'menu_id'      => $navcepted_menu,
 				) );
 			}
 
 			wp_send_json( array(
-				'success' => true,
-				'causes_limbo' => false
+				'success'      => true,
+				'causes_limbo' => false,
 			) );
 		}
 
 		function causes_limbo( $original_menu, $navcepted_menu ) {
 
-			if( ! is_array( $original_menu ) ) {
+			if ( ! is_array( $original_menu ) ) {
 				$original_menu = array( $original_menu );
 			}
 
-			if( in_array( $navcepted_menu, $original_menu ) ) {
+			if ( in_array( $navcepted_menu, $original_menu ) ) {
 				return true;
 			}
 			$original_menu[] = $navcepted_menu;
@@ -184,16 +182,16 @@
 
 			$navcepted_items = wp_get_nav_menu_items( $navcepted_menu );
 
-			foreach( $navcepted_items as $navcepted_item ) {
-				if( $navcepted_item->object != 'nav_menu' ) {
+			foreach ( $navcepted_items as $navcepted_item ) {
+				if ( 'nav_menu' != $navcepted_item->object ) {
 					continue;
 				}
 
-				if( in_array( $navcepted_item->object_id, $original_menu ) ) {
+				if ( in_array( $navcepted_item->object_id, $original_menu ) ) {
 					return true;
 				}
 				
-				if( $this->causes_limbo( $original_menu, $navcepted_item->object_id ) ) {
+				if ( $this->causes_limbo( $original_menu, $navcepted_item->object_id ) ) {
 					return true;
 				}
 			}
@@ -204,32 +202,34 @@
 
 
 		function pw_load_scripts( $hook ) {
-			if( $hook != 'nav-menus.php' ) {
+			if( 'nav-menus.php' != $hook ) {
 				return;
 			}
 
 			$current_menu_id = false;
-			if( $this->new_menu_id ) {
+			if ( $this->new_menu_id ) {
 				$current_menu_id = $this->new_menu_id;
-			} else if( isset( $_REQUEST['menu'] ) ) {
+			} else if ( isset( $_REQUEST['menu'] ) ) {
 				$current_menu_id = (int) $_REQUEST['menu'];
-			} else if( get_user_option( 'nav_menu_recently_edited' ) ) {
+			} else if ( get_user_option( 'nav_menu_recently_edited' ) ) {
 				$current_menu_id = (int) get_user_option( 'nav_menu_recently_edited' );
 			}
 
-			if( $current_menu_id ) {
+			if ( $current_menu_id ) {
 
 				wp_enqueue_script(
 					'navception',
 					plugins_url( '/navception.js', __FILE__ ),
-					array('jquery')
+					array(
+						'jquery',
+					)
 				);
 
 				wp_localize_script(
 					'navception',
 					'navception',
 					array(
-						'current_menu' => $current_menu_id
+						'current_menu' => $current_menu_id,
 					)
 				);
 			}
@@ -248,5 +248,5 @@
 		}
 
 	}
-	
+
 	new Navception();
