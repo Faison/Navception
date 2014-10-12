@@ -14,11 +14,11 @@ class Navception {
 
 	private $new_menu_id = false;
 
-	function __construct() {
+	public function __construct() {
 		$this->register_hooks();
 	}
 
-	function register_hooks() {
+	private function register_hooks() {
 		add_filter( 'wp_get_nav_menu_items', array( $this, 'navception' ), 10, 3 );
 
 		if ( ! is_admin() ) {
@@ -32,7 +32,7 @@ class Navception {
 		add_action( 'wp_create_nav_menu',      array( $this, 'detect_new_menu' ) );
 	}
 
-	function add_nav_box() {
+	public function add_nav_box() {
 		$tax = get_taxonomy( 'nav_menu' );
 		$tax = apply_filters( 'nav_menu_meta_box_object', $tax );
 		if ( $tax ) {
@@ -92,7 +92,7 @@ class Navception {
 		return $filtered_items;
 	}
 
-	function check_for_limbo( $menu_id, $menu_item_db_id, $args ) {
+	public function check_for_limbo( $menu_id, $menu_item_db_id, $args ) {
 		if ( isset( $args['menu-item-object'] ) && 'nav_menu' == $args['menu-item-object'] ) {
 			$original_menu   = $menu_id;
 			$navception_menu = (int) $args['menu-item-object-id'];
@@ -106,7 +106,7 @@ class Navception {
 		}
 	}
 
-	function check_for_limbo_ajax() {
+	public function check_for_limbo_ajax() {
 		$original_menu  = isset( $_POST['navception_original_menu'] ) ? $_POST['navception_original_menu'] : false;
 		$navcepted_menu = isset( $_POST['navception_new_menu'] ) ? $_POST['navception_new_menu'] : false;
 		$checkbox_ul    = isset( $_POST['navception_checkbox_ul'] ) ? $_POST['navception_checkbox_ul'] : false;
@@ -135,7 +135,7 @@ class Navception {
 		) );
 	}
 
-	function causes_limbo( $original_menu, $navcepted_menu ) {
+	private function causes_limbo( $original_menu, $navcepted_menu ) {
 
 		if ( ! is_array( $original_menu ) ) {
 			$original_menu = array( $original_menu );
@@ -166,9 +166,7 @@ class Navception {
 		return false;
 	}
 
-
-
-	function pw_load_scripts( $hook ) {
+	public function pw_load_scripts( $hook ) {
 		if( 'nav-menus.php' != $hook ) {
 			return;
 		}
@@ -202,11 +200,11 @@ class Navception {
 		}
 	}
 
-	function detect_new_menu( $menu_id ) {
+	public function detect_new_menu( $menu_id ) {
 		$this->new_menu_id = $menu_id;
 	}
 
-	function warn_of_limbo() {
+	private function warn_of_limbo() {
 		?>
 			<div id='message' class='error'>
 				<p><strong>Navception Warning:</strong> Adding that Menu would cause an infinite loop! I removed it for you :D</p>
