@@ -63,10 +63,21 @@ WordPress might have the Nav Menu options hidden after activation. To fix this, 
 
 == Changelog ==
 
+= 2.0.0 =
+* Rewrote the main Navception code to run on the 'wp_get_nav_menu_items' filter, which is easier to code and allows any custom Nav Menu Walker to do its thing.
+* Rewriting the main Navception code also fixes a bug where the 'menu-item-has-children' class wouldn't be added to menu items in a navcepted menu (Thanks to Emma for reporting :D)
+* Removed the need to include wp-admin/includes/nav-menu.php by replacing the use of the 'nav_menu_meta_box_object' filter with a custom 'navception_nav_menu_meta_box_object' filter.
+* Refactored to follow coding standards better.
+* Documented all the functions, fields, and filters.
+* Switched the Navception class to a singleton to avoid registering hooks multiple times.
+
 = 1.0.0 =
 * Initial Release.
 
 == Upgrade Notice ==
+
+= 2.0.0 =
+Navception has been refactored to work better and more efficient. This update "shouldn't" cause any issue, but since it's a big update, you should test this before updating on any production environments. Good news though, this should play nice with Custom Nav Walkers. And by that I mean I don't step on your toes.
 
 = 1.0.0 =
 If you have a version less than 1.0.0, something went really, really wrong. Upgrade now, because I have no idea what will happen if you don't!
