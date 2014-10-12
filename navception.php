@@ -8,14 +8,37 @@
  * Version: 1.0.0
  */
 
+/**
+ * The Navception Plugin Class
+ *
+ * @since 1.0.0
+ *
+ * @package Navception
+ */
 class Navception {
 
-	private $new_menu_id = false;
+	/**
+	 * The ID of a newly created Menu, if detected.
+	 *
+	 * @since 1.0.0
+	 * @var int
+	 */
+	private $new_menu_id = 0;
 
+	/**
+	 * The constructor, which calls register_hooks.
+	 *
+	 * @since 1.0.0
+	 */
 	public function __construct() {
 		$this->register_hooks();
 	}
 
+	/**
+	 * Hook up Navception functions to needed Filters and Actions.
+	 *
+	 * @since 1.0.0
+	 */
 	private function register_hooks() {
 		add_filter( 'wp_get_nav_menu_items', array( $this, 'navception' ), 10, 3 );
 
@@ -32,6 +55,8 @@ class Navception {
 
 	/**
 	 * Replace Nav Menu Menu Items with Menus.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param array  $items An array of menu item post objects.
 	 * @param object $menu  The menu object.
@@ -83,6 +108,8 @@ class Navception {
 
 	/**
 	 * Adds the Navigation Menus Meta Box to the Edit Menus Screen.
+	 *
+	 * @since 1.0.0
 	 */
 	public function add_nav_box() {
 		$nav_menu_tax = get_taxonomy( 'nav_menu' );
@@ -104,6 +131,11 @@ class Navception {
 		}
 	}
 
+	/**
+	 * Checks if adding a Nav Menu Menu Item to a menu causes an infinite loop, via AJAX.
+	 *
+	 * @since 1.0.0
+	 */
 	public function check_for_limbo_ajax() {
 		$original_menu  = isset( $_POST['navception_original_menu'] ) ? $_POST['navception_original_menu'] : false;
 		$navcepted_menu = isset( $_POST['navception_new_menu'] ) ? $_POST['navception_new_menu'] : false;
@@ -133,6 +165,18 @@ class Navception {
 		) );
 	}
 
+	/**
+	 * Checks if adding a Nav Menu Menu Item to a menu causes an infinite loop, via not AJAX.
+	 *
+	 * Since this function runs after the Nav Menu Menu Item is added to a menu, this function
+	 * also removes the Nav Menu Menu Item if an infinite loop is caused.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int   $menu_id         ID of the updated menu.
+	 * @param int   $menu_item_db_id ID of the updated menu item.
+	 * @param array $args            An array of arguments used to update a menu item.
+	 */
 	public function check_for_limbo( $menu_id, $menu_item_db_id, $args ) {
 		if ( isset( $args['menu-item-object'] ) && 'nav_menu' == $args['menu-item-object'] ) {
 			$original_menu   = $menu_id;
@@ -147,6 +191,32 @@ class Navception {
 		}
 	}
 
+	/**
+	 * Warn the user that an infinite loop would have been created.
+	 *
+	 * This is specifically used when an infinite loop is created when saving
+	 * without AJAX.
+	 *
+	 * @since 1.0.0
+	 */
+	private function warn_of_limbo() {
+		?>
+			<div id='message' class='error'>
+				<p><strong>Navception Warning:</strong> Adding that Menu would cause an infinite loop! I removed it for you :D</p>
+			</div>
+		<?php
+	}
+
+	/**
+	 * Checks if adding a Nav Menu Menu Item to a menu causes an infinite loop, via AJAX.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int|array $original_menu  A menu ID or array of menu IDs to check the $navcepted_menu against.
+	 * @param int       $navcepted_menu The menu ID to check against $original_menu for infinite loops.
+	 *
+	 * @return bool True if adding $navcepted_menu to $original_menu causes an infinite loop, otherwise false.
+	 */
 	private function causes_limbo( $original_menu, $navcepted_menu ) {
 
 		if ( ! is_array( $original_menu ) ) {
@@ -156,9 +226,8 @@ class Navception {
 		if ( in_array( $navcepted_menu, $original_menu ) ) {
 			return true;
 		}
+
 		$original_menu[] = $navcepted_menu;
-
-
 		$navcepted_items = wp_get_nav_menu_items( $navcepted_menu );
 
 		foreach ( $navcepted_items as $navcepted_item ) {
@@ -178,6 +247,13 @@ class Navception {
 		return false;
 	}
 
+	/**
+	 * Enqueues the navception.js if editing a menu.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $hook The current admin page.
+	 */
 	public function pw_load_scripts( $hook ) {
 		if( 'nav-menus.php' != $hook ) {
 			return;
@@ -212,18 +288,19 @@ class Navception {
 		}
 	}
 
+	/**
+	 * Stores the ID of the newly created menu for use in pw_load_scripts().
+	 *
+	 * The normal ways of getting a menu's ID doesn't seem to work when a new menu is
+	 * created, so this is the work around from version 1.0.0.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $menu_id ID of the new menu.
+	 */
 	public function detect_new_menu( $menu_id ) {
 		$this->new_menu_id = $menu_id;
 	}
-
-	private function warn_of_limbo() {
-		?>
-			<div id='message' class='error'>
-				<p><strong>Navception Warning:</strong> Adding that Menu would cause an infinite loop! I removed it for you :D</p>
-			</div>
-		<?php
-	}
-
 }
 
 new Navception();
