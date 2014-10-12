@@ -127,9 +127,11 @@ class Navception {
 		$nav_menu_tax = apply_filters( 'navception_nav_menu_meta_box_object', $nav_menu_tax );
 
 		if ( $nav_menu_tax ) {
-			$id = $nav_menu_tax->name;
-			add_meta_box( "add-{$id}", $nav_menu_tax->labels->name, 'wp_nav_menu_item_taxonomy_meta_box', 'nav-menus', 'side', 'default', $nav_menu_tax );
+			return;
 		}
+
+		$id = $nav_menu_tax->name;
+		add_meta_box( "add-{$id}", $nav_menu_tax->labels->name, 'wp_nav_menu_item_taxonomy_meta_box', 'nav-menus', 'side', 'default', $nav_menu_tax );
 	}
 
 	/**
