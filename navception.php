@@ -5,7 +5,7 @@
  * Description: Embed WordPress Menus inside of other WordPress Menus!
  * Author: Faison Zutavern
  * Author URI: http://faisonz.com
- * Version: 1.0.0
+ * Version: 2.0.0
  */
 
 /**
