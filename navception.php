@@ -271,24 +271,25 @@ class Navception {
 			$current_menu_id = (int) get_user_option( 'nav_menu_recently_edited' );
 		}
 
-		if ( $current_menu_id ) {
-
-			wp_enqueue_script(
-				'navception',
-				plugins_url( '/navception.js', __FILE__ ),
-				array(
-					'jquery',
-				)
-			);
-
-			wp_localize_script(
-				'navception',
-				'navception',
-				array(
-					'current_menu' => $current_menu_id,
-				)
-			);
+		if ( empty( $current_menu_id ) ) {
+			return;
 		}
+
+		wp_enqueue_script(
+			'navception',
+			plugins_url( '/navception.js', __FILE__ ),
+			array(
+				'jquery',
+			)
+		);
+
+		wp_localize_script(
+			'navception',
+			'navception',
+			array(
+				'current_menu' => $current_menu_id,
+			)
+		);
 	}
 
 	/**
