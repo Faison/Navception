@@ -49,7 +49,7 @@ class Navception {
 		add_action( 'admin_init',              array( $this, 'add_nav_box' ) );
 		add_action( 'wp_ajax_check_for_limbo', array( $this, 'check_for_limbo_ajax' ) );
 		add_action( 'wp_update_nav_menu_item', array( $this, 'check_for_limbo'), 10, 3);
-		add_action( 'admin_enqueue_scripts',   array( $this, 'pw_load_scripts' ) );
+		add_action( 'admin_enqueue_scripts',   array( $this, 'enqueue_scripts' ) );
 		add_action( 'wp_create_nav_menu',      array( $this, 'detect_new_menu' ) );
 	}
 
@@ -257,7 +257,7 @@ class Navception {
 	 *
 	 * @param string $hook The current admin page.
 	 */
-	public function pw_load_scripts( $hook ) {
+	public function enqueue_scripts( $hook ) {
 		if( 'nav-menus.php' != $hook ) {
 			return;
 		}
@@ -293,7 +293,7 @@ class Navception {
 	}
 
 	/**
-	 * Stores the ID of the newly created menu for use in pw_load_scripts().
+	 * Stores the ID of the newly created menu for use in enqueue_scripts().
 	 *
 	 * The normal ways of getting a menu's ID doesn't seem to work when a new menu is
 	 * created, so this is the work around from version 1.0.0.
