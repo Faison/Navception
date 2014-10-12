@@ -71,7 +71,7 @@ class Navception {
 		}
 
 		$filtered_items = array();
-		$nav_id_prefix  = ord( 'a' );
+		$nav_id_suffix  = ord( 'a' );
 
 		foreach ( $items as $item ) {
 			if ( 'nav_menu' != $item->object ) {
@@ -86,21 +86,22 @@ class Navception {
 				continue;
 			}
 
+			// Add a letter suffix to each Navcepted Menu's menu items' ids, parents, orders, etc.
 			foreach ( $navception_items as $navception_item ) {
-				$navception_item->ID         .= chr( $nav_id_prefix );
-				$navception_item->db_id      .= chr( $nav_id_prefix );
-				$navception_item->menu_order .= chr( $nav_id_prefix );
+				$navception_item->ID         .= chr( $nav_id_suffix );
+				$navception_item->db_id      .= chr( $nav_id_suffix );
+				$navception_item->menu_order .= chr( $nav_id_suffix );
 
 				if ( empty( $navception_item->menu_item_parent ) ) {
 					$navception_item->menu_item_parent = $item->menu_item_parent;
 				} else if ( $item->menu_item_parent != $navception_item->menu_item_parent ) {
-					$navception_item->menu_item_parent .= chr( $nav_id_prefix );
+					$navception_item->menu_item_parent .= chr( $nav_id_suffix );
 				}
 
 				$filtered_items[] = $navception_item;
 			}
 
-			$nav_id_prefix += 1;
+			$nav_id_suffix += 1;
 		}
 
 		return $filtered_items;
