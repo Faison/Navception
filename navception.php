@@ -8,8 +8,6 @@
  * Version: 1.0.0
  */
 
-require_once( ABSPATH . 'wp-admin/includes/nav-menu.php' );
-
 class Navception {
 
 	private $new_menu_id = false;
@@ -32,12 +30,26 @@ class Navception {
 		add_action( 'wp_create_nav_menu',      array( $this, 'detect_new_menu' ) );
 	}
 
+	/**
+	 * Adds the Navigation Menus Meta Box to the Edit Menus Screen.
+	 */
 	public function add_nav_box() {
-		$tax = get_taxonomy( 'nav_menu' );
-		$tax = apply_filters( 'nav_menu_meta_box_object', $tax );
-		if ( $tax ) {
-			$id = $tax->name;
-			add_meta_box( "add-{$id}", $tax->labels->name, 'wp_nav_menu_item_taxonomy_meta_box', 'nav-menus', 'side', 'default', $tax );
+		$nav_menu_tax = get_taxonomy( 'nav_menu' );
+		/**
+		 * Filter whether the Nav Menu menu items meta box will be added.
+		 *
+		 * If a falsey value is returned instead of an object, the menu items
+		 * meta box for Nav Menus will not be added.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param object $nav_menu_tax The Nav Menu object to add a menu items meta box for.
+		 */
+		$nav_menu_tax = apply_filters( 'navception_nav_menu_meta_box_object', $nav_menu_tax );
+
+		if ( $nav_menu_tax ) {
+			$id = $nav_menu_tax->name;
+			add_meta_box( "add-{$id}", $nav_menu_tax->labels->name, 'wp_nav_menu_item_taxonomy_meta_box', 'nav-menus', 'side', 'default', $nav_menu_tax );
 		}
 	}
 
