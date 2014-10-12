@@ -126,7 +126,7 @@ class Navception {
 		 */
 		$nav_menu_tax = apply_filters( 'navception_nav_menu_meta_box_object', $nav_menu_tax );
 
-		if ( $nav_menu_tax ) {
+		if ( ! $nav_menu_tax ) {
 			return;
 		}
 
