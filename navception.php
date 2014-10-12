@@ -100,13 +100,31 @@ class Navception {
 			return $items;
 		}
 
-		$filtered_items = array();
-		$nav_id_suffix  = ord( 'a' );
+		if ( empty( $args['navception_suffix_prefix'] ) ) {
+			$args['navception_suffix_prefix'] = '-navception';
+		}
+
+		$filtered_items            = array();
+		$nav_id_suffix             = 1;
+		$nav_suffix_prefix         = $args['navception_suffix_prefix'];
+		$nav_parent_suffix         = empty( $args['navception_parent_suffix'] ) ? '' : $args['navception_parent_suffix'];
+		$previous_menu_item_parent = empty( $args['navception_previous_menu_item_parent'] ) ? 0 : $args['navception_previous_menu_item_parent'];
 
 		foreach ( $items as $item ) {
 			if ( 'nav_menu' != $item->object ) {
 				$filtered_items[] = $item;
 				continue;
+			}
+
+			$navception_suffix                = sprintf( '%s%d', $nav_suffix_prefix, $nav_id_suffix );
+			$args['navception_parent_suffix'] = $navception_suffix;
+			$args['navception_suffix_prefix'] = $navception_suffix . '-';
+
+			// Setup the previous menu item parent to use in the next navcepted menu.
+			if ( ! empty( $item->menu_item_parent ) ) {
+				$args['navception_previous_menu_item_parent'] = $item->menu_item_parent . $nav_parent_suffix;
+			} else {
+				$args['navception_previous_menu_item_parent'] = $previous_menu_item_parent;
 			}
 
 			$navception_items = wp_get_nav_menu_items( $item->object_id, $args );
@@ -116,16 +134,25 @@ class Navception {
 				continue;
 			}
 
-			// Add a letter suffix to each Navcepted Menu's menu items' ids, parents, orders, etc.
-			foreach ( $navception_items as $navception_item ) {
-				$navception_item->ID         .= chr( $nav_id_suffix );
-				$navception_item->db_id      .= chr( $nav_id_suffix );
-				$navception_item->menu_order .= chr( $nav_id_suffix );
+			// Add a suffix to each Navcepted Menu's menu items' ids, parents, orders, etc.
+			foreach ( $navception_items as &$navception_item ) {
+				if ( false !== strpos( $navception_item->ID, '-navception' ) ) {
+					$filtered_items[] = $navception_item;
+					continue;
+				}
+
+				$navception_item->ID         .= $navception_suffix;
+				$navception_item->db_id      .= $navception_suffix;
+				$navception_item->menu_order .= $navception_suffix;
 
 				if ( empty( $navception_item->menu_item_parent ) ) {
-					$navception_item->menu_item_parent = $item->menu_item_parent;
+					if ( empty( $item->menu_item_parent ) ) {
+						$navception_item->menu_item_parent = $previous_menu_item_parent;
+					} else {
+						$navception_item->menu_item_parent = $item->menu_item_parent . $nav_parent_suffix;
+					}
 				} else if ( $item->menu_item_parent != $navception_item->menu_item_parent ) {
-					$navception_item->menu_item_parent .= chr( $nav_id_suffix );
+					$navception_item->menu_item_parent .= $navception_suffix;
 				}
 
 				$filtered_items[] = $navception_item;
