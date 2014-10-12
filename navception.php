@@ -202,7 +202,7 @@ class Navception {
 	 *
 	 * @since 1.0.0
 	 */
-	private function warn_of_limbo() {
+	public function warn_of_limbo() {
 		?>
 			<div id='message' class='error'>
 				<p><strong>Navception Warning:</strong> Adding that Menu would cause an infinite loop! I removed it for you :D</p>
