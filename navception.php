@@ -26,6 +26,14 @@ class Navception {
 	private static $instance;
 
 	/**
+	 * The current version of Navception.
+	 *
+	 * @since 2.0.0
+	 * @var int
+	 */
+	const version = '2.0.0';
+
+	/**
 	 * The ID of a newly created Menu, if detected.
 	 *
 	 * @since 1.0.0
@@ -305,7 +313,8 @@ class Navception {
 			plugins_url( '/navception.js', __FILE__ ),
 			array(
 				'jquery',
-			)
+			),
+			self::version
 		);
 
 		wp_localize_script(
