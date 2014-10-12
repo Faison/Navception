@@ -12,7 +12,6 @@ require_once( ABSPATH . 'wp-admin/includes/nav-menu.php' );
 
 class Navception {
 
-	private $hook;
 	private $new_menu_id = false;
 
 	function __construct() {
