@@ -181,17 +181,20 @@ class Navception {
 	 * @param array $args            An array of arguments used to update a menu item.
 	 */
 	public function check_for_limbo( $menu_id, $menu_item_db_id, $args ) {
-		if ( isset( $args['menu-item-object'] ) && 'nav_menu' == $args['menu-item-object'] ) {
-			$original_menu   = $menu_id;
-			$navception_menu = (int) $args['menu-item-object-id'];
-
-			if ( $this->causes_limbo( $original_menu, $navception_menu ) ) {
-				$this->removed_menus[] = $args['menu-item-title'];
-				add_action( 'admin_notices', array( $this, 'warn_of_limbo' ) );
-				wp_delete_post( $menu_item_db_id, true );
-
-			}
+		if ( empty( $args['menu-item-object'] ) || 'nav_menu' != $args['menu-item-object'] ) {
+			return;
 		}
+
+		$original_menu   = absint( $menu_id );
+		$navception_menu = absint( $args['menu-item-object-id'] );
+
+		if ( ! $this->causes_limbo( $original_menu, $navception_menu ) ) {
+			return;
+		}
+
+		$this->removed_menus[] = $args['menu-item-title'];
+		add_action( 'admin_notices', array( $this, 'warn_of_limbo' ) );
+		wp_delete_post( $menu_item_db_id, true );
 	}
 
 	/**
