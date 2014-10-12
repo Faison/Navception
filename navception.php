@@ -18,6 +18,14 @@
 class Navception {
 
 	/**
+	 * The Navception Instance.
+	 *
+	 * @since 2.0.0
+	 * @var object
+	 */
+	private static $instance;
+
+	/**
 	 * The ID of a newly created Menu, if detected.
 	 *
 	 * @since 1.0.0
@@ -26,13 +34,27 @@ class Navception {
 	private $new_menu_id = 0;
 
 	/**
-	 * The constructor, which calls register_hooks.
+	 * Function for retreiving the main Navception plugin instance.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @return Navception The main Navception plugin instance.
+	 */
+	public static function instance() {
+		if ( ! isset( self::$instance ) || ! self::$instance instanceof Navception ) {
+			self::$instance = new Navception;
+			self::$instance->register_hooks();
+		}
+
+		return self::$instance;
+	}
+
+	/**
+	 * Dummy constructor to keep the Navception Singleton from loading more than once.
 	 *
 	 * @since 1.0.0
 	 */
-	public function __construct() {
-		$this->register_hooks();
-	}
+	public function __construct() { /* Nothing going on here, move along. */ }
 
 	/**
 	 * Hook up Navception functions to needed Filters and Actions.
@@ -310,4 +332,4 @@ class Navception {
 	}
 }
 
-new Navception();
+Navception::instance();
