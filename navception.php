@@ -31,29 +31,6 @@ class Navception {
 	}
 
 	/**
-	 * Adds the Navigation Menus Meta Box to the Edit Menus Screen.
-	 */
-	public function add_nav_box() {
-		$nav_menu_tax = get_taxonomy( 'nav_menu' );
-		/**
-		 * Filter whether the Nav Menu menu items meta box will be added.
-		 *
-		 * If a falsey value is returned instead of an object, the menu items
-		 * meta box for Nav Menus will not be added.
-		 *
-		 * @since 2.0.0
-		 *
-		 * @param object $nav_menu_tax The Nav Menu object to add a menu items meta box for.
-		 */
-		$nav_menu_tax = apply_filters( 'navception_nav_menu_meta_box_object', $nav_menu_tax );
-
-		if ( $nav_menu_tax ) {
-			$id = $nav_menu_tax->name;
-			add_meta_box( "add-{$id}", $nav_menu_tax->labels->name, 'wp_nav_menu_item_taxonomy_meta_box', 'nav-menus', 'side', 'default', $nav_menu_tax );
-		}
-	}
-
-	/**
 	 * Replace Nav Menu Menu Items with Menus.
 	 *
 	 * @param array  $items An array of menu item post objects.
@@ -104,17 +81,26 @@ class Navception {
 		return $filtered_items;
 	}
 
-	public function check_for_limbo( $menu_id, $menu_item_db_id, $args ) {
-		if ( isset( $args['menu-item-object'] ) && 'nav_menu' == $args['menu-item-object'] ) {
-			$original_menu   = $menu_id;
-			$navception_menu = (int) $args['menu-item-object-id'];
+	/**
+	 * Adds the Navigation Menus Meta Box to the Edit Menus Screen.
+	 */
+	public function add_nav_box() {
+		$nav_menu_tax = get_taxonomy( 'nav_menu' );
+		/**
+		 * Filter whether the Nav Menu menu items meta box will be added.
+		 *
+		 * If a falsey value is returned instead of an object, the menu items
+		 * meta box for Nav Menus will not be added.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param object $nav_menu_tax The Nav Menu object to add a menu items meta box for.
+		 */
+		$nav_menu_tax = apply_filters( 'navception_nav_menu_meta_box_object', $nav_menu_tax );
 
-			if ( $this->causes_limbo( $original_menu, $navception_menu ) ) {
-				$this->removed_menus[] = $args['menu-item-title'];
-				add_action( 'admin_notices', array( $this, 'warn_of_limbo' ) );
-				wp_delete_post( $menu_item_db_id, true );
-
-			}
+		if ( $nav_menu_tax ) {
+			$id = $nav_menu_tax->name;
+			add_meta_box( "add-{$id}", $nav_menu_tax->labels->name, 'wp_nav_menu_item_taxonomy_meta_box', 'nav-menus', 'side', 'default', $nav_menu_tax );
 		}
 	}
 
@@ -145,6 +131,20 @@ class Navception {
 			'success'      => true,
 			'causes_limbo' => false,
 		) );
+	}
+
+	public function check_for_limbo( $menu_id, $menu_item_db_id, $args ) {
+		if ( isset( $args['menu-item-object'] ) && 'nav_menu' == $args['menu-item-object'] ) {
+			$original_menu   = $menu_id;
+			$navception_menu = (int) $args['menu-item-object-id'];
+
+			if ( $this->causes_limbo( $original_menu, $navception_menu ) ) {
+				$this->removed_menus[] = $args['menu-item-title'];
+				add_action( 'admin_notices', array( $this, 'warn_of_limbo' ) );
+				wp_delete_post( $menu_item_db_id, true );
+
+			}
+		}
 	}
 
 	private function causes_limbo( $original_menu, $navcepted_menu ) {
