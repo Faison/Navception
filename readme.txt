@@ -64,7 +64,7 @@ WordPress might have the Nav Menu options hidden after activation. To fix this, 
 == Changelog ==
 
 = 2.0.0 =
-* Rewrote the main Navception code to run on the 'wp_get_nav_menu_items' filter, which is easier to code and allows any custom Nav Menu Walker to do its thing.
+* Rewrote the main Navception code to run on the 'wp_get_nav_menu_items' filter, which is easier to code and allows any custom Nav Menu Walker to do its thing. I believe this also makes Navception work with Nav Menu Roles.
 * Rewriting the main Navception code also fixes a bug where the 'menu-item-has-children' class wouldn't be added to menu items in a navcepted menu (Thanks to Emma for reporting :D)
 * Removed the need to include wp-admin/includes/nav-menu.php by replacing the use of the 'nav_menu_meta_box_object' filter with a custom 'navception_nav_menu_meta_box_object' filter.
 * Updated the Admin JavaScript to work more efficiently.
