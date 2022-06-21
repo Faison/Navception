@@ -126,6 +126,8 @@ class Navception {
 			} else {
 				$args['navception_previous_menu_item_parent'] = $previous_menu_item_parent;
 			}
+			
+			unset( $args['tax_query'] );
 
 			$navception_items = wp_get_nav_menu_items( $item->object_id, $args );
 
